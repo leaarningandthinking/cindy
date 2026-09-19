@@ -1536,7 +1536,10 @@ export default function SessionScreen() {
       return next;
     });
     const projection = remoteSessionStore.getInputProjection(sessionId);
-    const source = remoteSessionStore.getMessages(sessionId);
+    // Use the same handoff-aware window that is rendered on screen. The raw
+    // mirror can lag behind history while a remote turn is still running;
+    // anchoring against it can place the optimistic send before visible rows.
+    const source = latestMessagesRef.current;
     // Match Desktop's idle-send placement. Busy follow-ups retain the existing
     // pending tail until authoritative history supplies their transcript row.
     const busy = projection.pendingQueue.length > 0 || projection.steeringQueueClientIds.length > 0

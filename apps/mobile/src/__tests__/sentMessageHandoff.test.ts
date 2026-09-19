@@ -117,6 +117,19 @@ describe('sent message handoff', () => {
     view.setActive(false);
   });
 
+  it('anchors a new optimistic send after rows already visible from history', () => {
+    const visible: RemoteMessage[] = [
+      { ...echo, id: 'visible-user', clientId: 'visible-user', content: { text: 'current task' } },
+      { ...echo, id: 'visible-agent', clientId: 'visible-agent', role: 'assistant', content: 'reply' },
+    ];
+    const next = { ...queued, clientId: 'next', text: 'follow-up',
+      chatMessage: { ...queued.chatMessage, clientId: 'next', content: 'follow-up' } };
+    const slots = appendOptimisticUserMessage([], visible, next, 's');
+
+    expect(projectOptimisticUserMessages(visible, slots).map((message) => message.clientId))
+      .toEqual(['visible-user', 'visible-agent', 'next']);
+  });
+
   it('drops a reservation when the raw echo is deleted before history takes over', () => {
     let slots = appendOptimisticUserMessage([], [], queued, 's');
     slots = reconcileOptimisticUserMessages(slots, [echo], none, none);
